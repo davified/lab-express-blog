@@ -7,7 +7,6 @@ function userLoggedIn (req, res, next) {
 
   User.findOne({email: userEmail, auth_token: authToken}, (err, user) => {
     if (err || !user) return res.status(401).json({error: 'unauthorised'})
-
     req.currentUser = user
     next()
   })

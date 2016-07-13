@@ -55,27 +55,15 @@ app.get('/users/:id', userController.getOneUser)
     res.send('Delete the book');
   })
 
-app.route('/post')
-  .get(postController.getAllPosts)
-  .post(postController.makeNewPost)
+app.post('/users/:id/post', userController.userLoggedIn, postController.makeNewPost)
+
+app.route('/users/:id/post/:id')
   .put(function(req, res) {
     res.send('Update the book');
   })
   .delete(function(req, res) {
     res.send('Delete the book');
   })
-
-
-app.route('/post')
-  .get(postController.getAllPosts)
-  .post(postController.makeNewPost)
-  .put(function(req, res) {
-    res.send('Update the book');
-  })
-  .delete(function(req, res) {
-    res.send('Delete the book');
-  })
-
 
 app.listen(port, () => {
   console.log(`listening on port ${port}`)

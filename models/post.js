@@ -4,7 +4,7 @@ const User = require('./user')
 const PostSchema = new mongoose.Schema({
   title: String,
   body: String,
-  // author: [User.schema]
+  author: [User]
 })
 
 const Post = mongoose.model('Post', PostSchema)
