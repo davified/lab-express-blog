@@ -5,64 +5,52 @@ const User = require('./models/user')
 const Post = require('./models/post')
 const postController = require('./controllers/postController')
 const userController = require('./controllers/userController')
+const signInUpController = require('./controllers/signInUpController')
 
 const port = process.env.PORT || 3000
 const app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
-
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, User-Email, Auth-Token')
   next()
 })
-
 mongoose.connect('mongodb://default:defaultpassword@ds011963.mlab.com:11963/blog-app-david')
 
-app.post('/signup', (req, res) => {
-  const user = new User(req.body)
+// ROUTING END POINTS TO THE APPROPRIATE FUNCTIONS
+app.post('/signup', signInUpController.signUp)
+app.post('/signin', signInUpController.signIn)
 
-  user.save((err, user) => {
-    if (err) return res.status(401).json({error: '/signup error 1'})
-    res.status(200).json({message: 'welcome! ', user})
-  })
-})
+// GET ALL POSTS (these 2 end-points execute the same function)
+app.get('/', postController.getAllPosts)
+app.get('/posts', postController.getAllPosts)
 
-app.post('/signin', (req, res) => {
-  const userParams = req.body
+// GET ONE POST (by id)
+app.get('/posts/:id', postController.getPostById)
 
-  User.findOne({email: userParams.email}, (err, user) => {
-    if (err || !user) return res.status(401).json({error: '/signin error 1'})
-    user.authenticate(userParams.password, (err, isMatch) => {
-      if (err) return res.status(401).json({err: '/signin error 2'})
-      res.status(200).json({message: 'sign in success! welcome: ' + user.name})
-    })
-  })
-})
+// GET ALL USERS
+app.get('/users', userController.getAllUsers)
 
-app.route('/')
-  .get(postController.getAllPosts)
-
-app.route('/users')
-  .get(userController.getAllUsers)
-
+// GET A SPECIFIC USER (by id)
 app.get('/users/:id', userController.getOneUser)
+app.get('/users/:id/posts', postController.getAllPostsOfOneUser)
+app.get('/users/:id/posts/:id', postController.getOnePostOfOneUser)
 
-  .put(function(req, res) {
-    res.send('Update the book');
-  })
-  .delete(function(req, res) {
-    res.send('Delete the book');
-  })
+/* AFTER USER IS LOGGED IN  */
+// CREATE POST
+app.post('/posts', userController.userLoggedIn, postController.makeNewPost)
 
-app.post('/users/:id/post', userController.userLoggedIn, postController.makeNewPost)
+// GET ONE POST (by id)
+// app.get('/posts/:id', userController.userLoggedIn, postController.getOnePost)
 
-app.route('/users/:id/post/:id')
-  .put(function(req, res) {
-    res.send('Update the book');
+// EDIT AND DELETE POSTS
+app.route('/posts/:id')
+  .put(function (req, res) {
+    res.send('Update the book')
   })
-  .delete(function(req, res) {
-    res.send('Delete the book');
+  .delete(function (req, res) {
+    res.send('Delete the book')
   })
 
 app.listen(port, () => {
