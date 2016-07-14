@@ -27,15 +27,15 @@ app.get('/', postController.getAllPosts)
 app.get('/posts', postController.getAllPosts)
 
 // GET ONE POST (by id)
-app.get('/posts/:id', postController.getPostById)
+app.get('/posts/:id', userController.userLoggedIn, postController.getPostById)
 
 // GET ALL USERS
 app.get('/users', userController.getAllUsers)
 
 // GET A SPECIFIC USER (by id)
-app.get('/users/:id', userController.getOneUser)
-app.get('/users/:id/posts', postController.getAllPostsOfOneUser)
-app.get('/users/:id/posts/:id', postController.getOnePostOfOneUser)
+app.get('/users/:user_id', userController.getOneUser)
+app.get('/users/:user_id/posts', postController.getAllPostsOfOneUser)
+app.get('/users/:user_id/posts/:id', postController.getOnePostOfOneUser)
 
 /* AFTER USER IS LOGGED IN  */
 // CREATE POST
@@ -46,12 +46,8 @@ app.post('/posts', userController.userLoggedIn, postController.makeNewPost)
 
 // EDIT AND DELETE POSTS
 app.route('/posts/:id')
-  .put(function (req, res) {
-    res.send('Update the book')
-  })
-  .delete(function (req, res) {
-    res.send('Delete the book')
-  })
+  .put(userController.userLoggedIn, postController.updatePost)
+  .delete(userController.userLoggedIn, postController.deletePost)
 
 app.listen(port, () => {
   console.log(`listening on port ${port}`)

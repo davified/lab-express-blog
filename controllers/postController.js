@@ -27,30 +27,51 @@ function makeNewPost (req, res) {
 }
 
 function getAllPostsOfOneUser (req, res) {
-  User.findById({_id: req.params.id}, function (err, user) {
+  User.findById(req.params.user_id, function (err, user) {
     if (err) return res.status(401).json({error: '/get getAllPostsOfOneUser error 1'})
     res.status(200).json(user.posts)
   })
 }
 
 function getOnePostOfOneUser (req, res) {
-  // var userId = req.params.id
-  var postId = req.params.id
-  console.log(req)
-  Post.findById({_id: postId}, function (err, post) {
-    if (err) console.log({message: 'no users found'})
-    res.send(post)
+  const postId = req.params.id
+  User.findById(req.params.user_id, function (err, user) {
+    if (err) return res.status(401).json({error: '/get getOnePostOfOneUser error 1'})
+    const post = user.posts.id(postId)
+    res.status(200).json(post)
+  })
+
+  Post.findById(req.params.id, function (err, post) {
+    if (err) console.log({message: 'no post found'})
+    res.status(200).json(post)
   })
 }
 
 // needs to be fixed. can't access posts which are nested inside uesrs
 function getPostById (req, res) {
-  // getAllPosts(req, res)
-  User.find({}).populate('posts').exec(function (err, users) {
-    // Post.findById({_id: req.params.id}, function (err, post) {
-    //   console.log(post)
-    res.status(200).json(users)
-  // })
+  const postId = req.params.id
+  const post = req.currentUser.posts.id(postId)
+  res.status(200).json(post)
+}
+
+function updatePost (req, res) {
+  const postId = req.params.id
+  var post = req.currentUser.posts.id(postId)
+  post.title = req.body.title
+  post.body = req.body.body
+  req.currentUser.save((err) => {
+    if (err) return res.status(401).json({error: err})
+    res.status(200).json({message: 'Post updated', post})
+  })
+}
+
+function deletePost (req, res) {
+  const postId = req.params.id
+  var post = req.currentUser.posts.id(postId)
+  req.currentUser.posts.pull(post)
+  req.currentUser.save((err) => {
+    if (err) return res.status(401).json({error: err})
+    res.status(200).json({message: 'Post deleted!'})
   })
 }
 
@@ -59,5 +80,7 @@ module.exports = {
   makeNewPost: makeNewPost,
   getPostById: getPostById,
   getAllPostsOfOneUser: getAllPostsOfOneUser,
-  getOnePostOfOneUser: getOnePostOfOneUser
+  getOnePostOfOneUser: getOnePostOfOneUser,
+  updatePost: updatePost,
+  deletePost: deletePost
 }
