@@ -2,7 +2,6 @@ const User = require('../models/user')
 
 function signUp(req, res) {
   const user = new User(req.body)
-
   user.save((err, user) => {
     if (err) return res.status(401).json({error: '/signup error 1'})
     res.status(200).json({message: 'welcome! ', user})
